@@ -5,6 +5,9 @@ import express from "express"; // The core Express.js framework
 import mongoose from "mongoose"; // An ODM (Object Data Modeling) library for MongoDB
 import morgan from "morgan"; // HTTP request logger middleware
 
+// Import route handlers
+import routes from "./routes/index.js";
+
 // Load environment variables from the .env file
 dotenv.config();
 
@@ -44,6 +47,9 @@ app.get("/", async (req, res) => {
     message: "Welcome To Taskwell API",
   });
 });
+
+// http://localhost:3000/api-v1/...
+app.use("/api-v1", routes);
 
 // --- Error Handling Middleware ---
 // Global error middleware to catch and handle errors
