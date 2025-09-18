@@ -1,4 +1,4 @@
-import { signInSchema, signUpSchema } from "@/lib/schema";
+import { signInSchema, signUpSchema } from "app/lib/schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,8 +21,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
+import { useSignUpMutation } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
-type SignUpFormData = z.infer<typeof signUpSchema>;
+export type SignUpFormData = z.infer<typeof signUpSchema>;
 
 const SignUp = () => {
   const form = useForm<SignUpFormData>({
@@ -35,8 +37,20 @@ const SignUp = () => {
     },
   });
 
+  const { mutate, isPending } = useSignUpMutation();
+
   const handleOnSubmit = (values: SignUpFormData) => {
-    console.log(values);
+    mutate(values, {
+      onSuccess: () => {
+        toast.success("Account created succesfully");
+      },
+      onError: (error: any) => {
+        const errorMessage =
+          error.response?.data?.message || "An error ocurred";
+        console.log(error);
+        toast.error(errorMessage);
+      },
+    });
   };
 
   return (
@@ -120,8 +134,12 @@ const SignUp = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Sign Up
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isPending}
+              >
+                {isPending ? "Signing up..." : "Sign up"}
               </Button>
             </form>
           </Form>
