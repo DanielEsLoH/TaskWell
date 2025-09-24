@@ -9,14 +9,12 @@ import { toast } from "sonner";
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
 
+  const token = searchParams.get("token");
   const [isSuccess, setIsSuccess] = useState(false);
   const { mutate, isPending: isVerifying } = useVerifyEmailMutation();
 
   useEffect(() => {
-    const token = searchParams.get("token");
-    if (!token) {
-      setIsSuccess(false);
-    } else {
+    if (token) {
       mutate(
         { token },
         {

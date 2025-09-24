@@ -74,7 +74,6 @@ const loginUser = async (req, res) => {
 };
 
 const verifyEmail = async (req, res) => {
-  console.log("CUERPO RECIBIDO EN /verify-email:", req.body);
   try {
     const { token } = req.body;
     const payload = jwt.verify(token, process.env.JWT_SECRET);
