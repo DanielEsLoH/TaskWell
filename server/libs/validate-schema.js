@@ -15,4 +15,24 @@ const verifyEmailSchema = z.object({
   token: z.string().min(1, { message: "El token es requerido" }),
 });
 
-export { registerSchema, loginSchema, verifyEmailSchema };
+const resetPasswordSchema = z.object({
+  token: z.string().min(1, { message: "Token is required" }),
+  newPassword: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters long" }),
+  confirmPassword: z
+    .string()
+    .min(6, { message: "Confirm Password must be at least 6 characters long" }),
+});
+
+const emailSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+export {
+  registerSchema,
+  loginSchema,
+  verifyEmailSchema,
+  resetPasswordSchema,
+  emailSchema,
+};
