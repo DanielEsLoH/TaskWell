@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 
 const projectSchema = new Schema(
   {
@@ -15,7 +15,7 @@ const projectSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["Planning", "In Progess", "On Hold", "Completed", "Cancelled"],
+      enum: ["Planning", "In Progress", "On Hold", "Completed", "Cancelled"],
       default: "Planning",
     },
     startDate: { type: Date },
@@ -42,6 +42,6 @@ const projectSchema = new Schema(
   { timestamps: true }
 );
 
-const Project = model("Project", projectSchema);
+const Project = mongoose.model("Project", projectSchema);
 
 export default Project;

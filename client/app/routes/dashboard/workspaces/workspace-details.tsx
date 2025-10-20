@@ -9,13 +9,12 @@ import { CreateProjectDialog } from "@/components/project/create-project";
 
 const WorkspaceDetails = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
-  const [isCreateProject, setIscreateProject] = useState(false);
+  const [isCreateProject, setIsCreateProject] = useState(false);
   const [isInviteMember, setIsInviteMember] = useState(false);
 
   if (!workspaceId) {
     return <div>No workspace found</div>;
   }
-
   const { data, isLoading } = useGetWorkspaceQuery(workspaceId) as {
     data: {
       workspace: Workspace;
@@ -23,7 +22,6 @@ const WorkspaceDetails = () => {
     };
     isLoading: boolean;
   };
-
   if (isLoading) {
     return (
       <div>
@@ -31,23 +29,22 @@ const WorkspaceDetails = () => {
       </div>
     );
   }
-
   return (
     <div className="space-y-8">
-      <WorkspaceHeader 
+      <WorkspaceHeader
         workspace={data.workspace}
         members={data?.workspace?.members as any}
-        onCreateProject={() => setIscreateProject(true)}
+        onCreateProject={() => setIsCreateProject(true)}
         onInviteMember={() => setIsInviteMember(true)}
       />
       <ProjectList
         workspaceId={workspaceId}
         projects={data.projects}
-        onCreateProject={() => setIscreateProject(true)}
+        onCreateProject={() => setIsCreateProject(true)}
       />
       <CreateProjectDialog
         isOpen={isCreateProject}
-        onOpenChange={setIscreateProject}
+        onOpenChange={setIsCreateProject}
         workspaceId={workspaceId}
         workspaceMembers={data.workspace.members as any}
       />

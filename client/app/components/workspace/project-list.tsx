@@ -5,6 +5,7 @@ import { ProjectCard } from "../project/project-card";
 interface ProjectListProps {
   workspaceId: string;
   projects: Project[];
+
   onCreateProject: () => void;
 }
 
@@ -27,6 +28,7 @@ export const ProjectList = ({
         ) : (
           projects.map((project) => {
             const projectProgress = 0;
+            
             return (
               <ProjectCard
                 key={project._id}

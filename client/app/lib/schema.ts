@@ -51,13 +51,13 @@ export const projectSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().optional(),
   status: z.enum(ProjectStatus),
-  startDate: z.string().min(10, "Start date is required"),
-  dueDate: z.string().min(10, "Due date is required"),
+  startDate: z.union([z.string().min(10, "Start date must be a valid date"), z.literal(""), z.undefined()]).optional(),
+  dueDate: z.union([z.string().min(10, "Due date must be a valid date"), z.literal(""), z.undefined()]).optional(),
   members: z
     .array(
       z.object({
         user: z.string(),
-        role: z.enum(["admin", "member", "owner", "viewer"]),
+        role: z.enum(["manager", "contributor", "viewer"]),
       })
     )
     .optional(),
