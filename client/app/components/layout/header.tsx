@@ -12,8 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Link, useLoaderData } from "react-router";
-import { WorkSpaceAvatar } from "../workspace/workspace-avatar";
+import { Link, useLoaderData, useLocation, useNavigate } from "react-router";
+import { WorkspaceAvatar } from "../workspace/workspace-avatar";
 
 interface HeaderProps {
   onWorkspaceSelected: (workspace: Workspace) => void;
@@ -26,18 +26,33 @@ export const Header = ({
   selectedWorkspace,
   onCreateWorkspace,
 }: HeaderProps) => {
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { workspaces } = useLoaderData() as { workspaces: Workspace[] };
+  const isOnWorkspacePage = useLocation().pathname.includes("/workspace");
+
+  const handleOnClick = (workspace: Workspace) => {
+    onWorkspaceSelected(workspace);
+    const location = window.location;
+
+    if (isOnWorkspacePage) {
+      navigate(`/workspaces/${workspace._id}`);
+    } else {
+      const basePath = location.pathname;
+      navigate(`${basePath}?workspaceId=${workspace._id}`);
+    }
+  };
+
   return (
     <div className="bg-background sticky top-0 z-40 border-b">
-      <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant={"outline"}>
               {selectedWorkspace ? (
                 <>
                   {selectedWorkspace.color && (
-                    <WorkSpaceAvatar
+                    <WorkspaceAvatar
                       color={selectedWorkspace.color}
                       name={selectedWorkspace.name}
                     />
@@ -45,7 +60,7 @@ export const Header = ({
                   <span className="font-medium">{selectedWorkspace?.name}</span>
                 </>
               ) : (
-                <span className="font-medium">Select a workspace</span>
+                <span className="font-medium">Select Workspace</span>
               )}
             </Button>
           </DropdownMenuTrigger>
@@ -53,19 +68,21 @@ export const Header = ({
           <DropdownMenuContent>
             <DropdownMenuLabel>Workspace</DropdownMenuLabel>
             <DropdownMenuSeparator />
+
             <DropdownMenuGroup>
               {workspaces.map((ws) => (
                 <DropdownMenuItem
                   key={ws._id}
-                  onClick={() => onWorkspaceSelected(ws)}
+                  onClick={() => handleOnClick(ws)}
                 >
                   {ws.color && (
-                    <WorkSpaceAvatar color={ws.color} name={ws.name} />
+                    <WorkspaceAvatar color={ws.color} name={ws.name} />
                   )}
                   <span className="ml-2">{ws.name}</span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>
+
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={onCreateWorkspace}>
                 <PlusCircle className="w-4 h-4 mr-2" />
