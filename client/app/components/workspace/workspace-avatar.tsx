@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
-export const WorkSpaceAvatar = ({
+export const WorkspaceAvatar = ({
   color,
   name,
 }: {
@@ -20,3 +20,6 @@ export const WorkSpaceAvatar = ({
     </div>
   );
 };
+
+// Legacy export for backwards compatibility
+export const WorkSpaceAvatar = WorkspaceAvatar;
