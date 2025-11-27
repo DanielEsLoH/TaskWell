@@ -3,9 +3,10 @@ import { useGetWorkspaceQuery } from "@/hooks/use-workspace";
 import type { Project, Workspace } from "@/types";
 import { useState } from "react";
 import { useParams } from "react-router";
-import { WorkspaceHeader } from "./workspace-header";
+import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { ProjectList } from "@/components/workspace/project-list";
 import { CreateProjectDialog } from "@/components/project/create-project";
+import { InviteMemberDialog } from "@/components/workspace/invite-member";
 
 const WorkspaceDetails = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -47,6 +48,11 @@ const WorkspaceDetails = () => {
         onOpenChange={setIsCreateProject}
         workspaceId={workspaceId}
         workspaceMembers={data.workspace.members as any}
+      />
+      <InviteMemberDialog
+        isOpen={isInviteMember}
+        onOpenChange={setIsInviteMember}
+        workspaceId={workspaceId}
       />
     </div>
   );
