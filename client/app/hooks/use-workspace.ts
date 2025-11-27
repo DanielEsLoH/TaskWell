@@ -15,24 +15,27 @@ export const useGetWorkspacesQuery = () => {
   });
 };
 
-export const useGetWorkspaceQuery = (workspaceId: string) => {
+export const useGetWorkspaceQuery = (workspaceId: string | null) => {
   return useQuery({
     queryKey: ["workspace", workspaceId],
     queryFn: async () => fetchData(`/workspaces/${workspaceId}/projects`),
+    enabled: !!workspaceId,
   });
 };
 
-export const useGetWorkspaceStatsQuery = (workspaceId: string) => {
+export const useGetWorkspaceStatsQuery = (workspaceId: string | null) => {
   return useQuery({
     queryKey: ["workspace", workspaceId, "stats"],
     queryFn: async () => fetchData(`/workspaces/${workspaceId}/stats`),
+    enabled: !!workspaceId,
   });
 };
 
-export const useGetWorkspaceDetailsQuery = (workspaceId: string) => {
+export const useGetWorkspaceDetailsQuery = (workspaceId: string | null) => {
   return useQuery({
     queryKey: ["workspace", workspaceId, "details"],
     queryFn: async () => fetchData(`/workspaces/${workspaceId}`),
+    enabled: !!workspaceId,
   });
 };
 
