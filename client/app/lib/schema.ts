@@ -50,9 +50,9 @@ export const workspaceSchema = z.object({
 export const projectSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().optional(),
-  status: z.enum(ProjectStatus),
-  startDate: z.union([z.string().min(10, "Start date must be a valid date"), z.literal(""), z.undefined()]).optional(),
-  dueDate: z.union([z.string().min(10, "Due date must be a valid date"), z.literal(""), z.undefined()]).optional(),
+  status: z.nativeEnum(ProjectStatus),
+  startDate: z.string().min(10, "Start date is required"),
+  dueDate: z.string().min(10, "Due date is required"),
   members: z
     .array(
       z.object({
@@ -62,4 +62,18 @@ export const projectSchema = z.object({
     )
     .optional(),
   tags: z.string().optional(),
+});
+
+export const createTaskSchema = z.object({
+  title: z.string().min(1, "Task title is required"),
+  description: z.string().optional(),
+  status: z.enum(["To Do", "In Progress", "Done"]),
+  priority: z.enum(["Low", "Medium", "High"]),
+  dueDate: z.string().min(1, "Due date is required"),
+  assignees: z.array(z.string()).min(1, "At least one assignee is required"),
+});
+
+export const inviteMemberSchema = z.object({
+  email: z.string().email(),
+  role: z.enum(["admin", "member", "viewer"]),
 });
