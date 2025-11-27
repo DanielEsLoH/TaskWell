@@ -8,6 +8,9 @@ import {
   getWorkspaceProjects,
   getWorkspaces,
   getWorkspaceStats,
+  inviteUserToWorkspace,
+  acceptInviteByToken,
+  acceptGenerateInvite,
 } from "../controllers/workspace.js";
 
 const router = express.Router();
@@ -23,5 +26,10 @@ router.get("/", authMiddleware, getWorkspaces);
 router.get("/:workspaceId", authMiddleware, getWorkspaceDetails);
 router.get("/:workspaceId/projects", authMiddleware, getWorkspaceProjects);
 router.get("/:workspaceId/stats", authMiddleware, getWorkspaceStats);
+
+// Invitation routes
+router.post("/:workspaceId/invite-member", authMiddleware, inviteUserToWorkspace);
+router.post("/accept-invite-token", authMiddleware, acceptInviteByToken);
+router.post("/:workspaceId/accept-generate-invite", authMiddleware, acceptGenerateInvite);
 
 export default router;
