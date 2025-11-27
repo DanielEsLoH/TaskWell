@@ -13,7 +13,7 @@ const workspaceModel = new Schema(
     },
     color: {
       type: String,
-      default: "FF5733",
+      default: "#FF5733",
     },
     owner: {
       type: Schema.Types.ObjectId,
