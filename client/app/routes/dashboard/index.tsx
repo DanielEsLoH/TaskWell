@@ -32,10 +32,36 @@ const Dashboard = () => {
     isPending: boolean;
   };
 
+  if (!workspaceId) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Welcome to Your Dashboard</h2>
+          <p className="text-muted-foreground">
+            Please select a workspace from the dropdown above to view your dashboard analytics.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (isPending) {
     return (
       <div>
         <Loader />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">No Data Available</h2>
+          <p className="text-muted-foreground">
+            Unable to load dashboard data for this workspace.
+          </p>
+        </div>
       </div>
     );
   }
