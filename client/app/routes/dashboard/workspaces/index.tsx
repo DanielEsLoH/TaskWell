@@ -4,7 +4,7 @@ import { CreateWorkspace } from "@/components/workspace/create-workspace";
 import { useGetWorkspacesQuery } from "@/hooks/use-workspace";
 import type { Workspace } from "@/types";
 import { PlusCircle, Users } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { NoDataFound } from "./no-data-found";
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
