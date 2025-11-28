@@ -20,7 +20,7 @@ export default [
     route("workspaces", "routes/dashboard/workspaces/index.tsx"),
     route(
       "workspaces/:workspaceId",
-      "routes/dashboard/workspaces/workspace-details.tsx"
+      "routes/workspaces.$workspaceId.tsx"
     ),
     route(
       "workspaces/:workspaceId/projects/:projectId",
@@ -36,7 +36,7 @@ export default [
 
   route(
     "workspace-invite/:workspaceId",
-    "routes/dashboard/workspaces/workspace-invite.tsx"
+    "routes/workspace-invite.$workspaceId.tsx"
   ),
 
   layout("routes/user/user-layout.tsx", [
