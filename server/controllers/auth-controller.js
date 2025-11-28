@@ -2,6 +2,7 @@ import User from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../libs/send-email.js";
+import { emailVerificationTemplate, passwordResetTemplate } from "../libs/email-templates.js";
 import Verification from "../models/verification.js";
 import aj from "../libs/arcjet.js";
 
@@ -45,8 +46,8 @@ const registerUser = async (req, res) => {
 
     // send email
     const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
-    const emailBody = `<p>Click <a href="${verificationLink}">here</a> to verify your email</p>`;
-    const emailSubject = "Verify your email";
+    const emailBody = emailVerificationTemplate(verificationLink, name);
+    const emailSubject = "Verify Your Email Address - TaskWell";
 
     const isEmailSent = await sendEmail(email, emailSubject, emailBody);
 
@@ -101,8 +102,8 @@ const loginUser = async (req, res) => {
 
         // send email
         const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
-        const emailBody = `<p>Click <a href="${verificationLink}">here</a> to verify your email</p>`;
-        const emailSubject = "Verify your email";
+        const emailBody = emailVerificationTemplate(verificationLink, user.name);
+        const emailSubject = "Verify Your Email Address - TaskWell";
 
         const isEmailSent = await sendEmail(email, emailSubject, emailBody);
 
@@ -145,16 +146,26 @@ const loginUser = async (req, res) => {
 const verifyEmail = async (req, res) => {
   try {
     const { token } = req.body;
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Verify JWT token
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (jwtError) {
+      console.error("JWT verification failed:", jwtError.message);
+      return res.status(401).json({
+        message: "Invalid or expired verification token"
+      });
+    }
 
     if (!payload) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Invalid verification token" });
     }
 
     const { userId, purpose } = payload;
 
     if (purpose !== "email-verification") {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Invalid token purpose" });
     }
 
     const verification = await Verification.findOne({
@@ -163,23 +174,24 @@ const verifyEmail = async (req, res) => {
     });
 
     if (!verification) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Verification token not found" });
     }
 
     const isTokenExpired = verification.expiresAt < new Date();
 
     if (isTokenExpired) {
-      return res.status(401).json({ message: "Token expired" });
+      await Verification.findByIdAndDelete(verification._id);
+      return res.status(401).json({ message: "Verification token has expired" });
     }
 
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "User not found" });
     }
 
     if (user.isEmailVerified) {
-      res.status(400).json({ message: "Email already verified" });
+      return res.status(400).json({ message: "Email already verified" });
     }
 
     user.isEmailVerified = true;
@@ -189,7 +201,7 @@ const verifyEmail = async (req, res) => {
 
     res.status(200).json({ message: "Email verified successfully" });
   } catch (error) {
-    console.log(error);
+    console.error("Email verification error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -237,8 +249,8 @@ const resetPasswordRequest = async (req, res) => {
 
     // send email
     const resetPasswordLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
-    const emailBody = `<p>Click <a href="${resetPasswordLink}">here</a> to reset your password</p>`;
-    const emailSubject = "Reset your password";
+    const emailBody = passwordResetTemplate(resetPasswordLink, user.name);
+    const emailSubject = "Reset Your Password - TaskWell";
 
     const isEmailSent = await sendEmail(email, emailSubject, emailBody);
 
@@ -259,36 +271,47 @@ const verifyResetPasswordTokenAndResetPassword = async (req, res) => {
   try {
     const { token, newPassword, confirmPassword } = req.body;
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify JWT token
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (jwtError) {
+      console.error("JWT verification failed:", jwtError.message);
+      return res.status(401).json({
+        message: "Invalid or expired reset token"
+      });
+    }
 
     if (!payload) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Invalid reset token" });
     }
 
     const { userId, purpose } = payload;
 
     if (purpose !== "reset-password") {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Invalid token purpose" });
     }
+
     const verification = await Verification.findOne({
       userId,
       token,
     });
 
     if (!verification) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Reset token not found" });
     }
 
     const isTokenExpired = verification.expiresAt < new Date();
 
     if (isTokenExpired) {
-      return res.status(401).json({ message: "Token expired" });
+      await Verification.findByIdAndDelete(verification._id);
+      return res.status(401).json({ message: "Reset token has expired" });
     }
 
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "User not found" });
     }
 
     if (newPassword !== confirmPassword) {
@@ -306,7 +329,7 @@ const verifyResetPasswordTokenAndResetPassword = async (req, res) => {
     await Verification.findByIdAndDelete(verification._id);
     res.status(200).json({ message: "Password reset successful" });
   } catch (error) {
-    console.log(error);
+    console.error("Password reset error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
