@@ -41,7 +41,7 @@ const registerUser = async (req, res) => {
     await Verification.create({
       userId: newUser._id,
       token: verificationToken,
-      expiresAt: new Date(Date.now() + 1 * 60 * 1000),
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour to match JWT expiration
     });
 
     // send email
@@ -97,7 +97,7 @@ const loginUser = async (req, res) => {
         await Verification.create({
           userId: user._id,
           token: verificationToken,
-          expiresAt: new Date(Date.now() + 1 * 60 * 1000),
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour to match JWT expiration
         });
 
         // send email
