@@ -4,6 +4,7 @@ import Task from "../models/task.js";
 import Invitation from "../models/invitation.js";
 import User from "../models/user.js";
 import crypto from "crypto";
+import { sendEmail } from "../libs/send-email.js";
 
 const createWorkspace = async (req, res) => {
   try {
@@ -336,9 +337,34 @@ const inviteUserToWorkspace = async (req, res) => {
       expiresAt,
     });
 
-    // TODO: Send email with invitation link
-    // const invitationLink = `${process.env.CLIENT_URL}/workspace-invite/${token}`;
-    // await sendInvitationEmail(email, workspace.name, invitationLink);
+    // Send email with invitation link
+    const invitationLink = `${process.env.FRONTEND_URL}/workspace-invite?token=${token}`;
+
+    const emailContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">You've been invited to join ${workspace.name}</h2>
+        <p>Hello,</p>
+        <p>You have been invited to join the <strong>${workspace.name}</strong> workspace on TaskWell.</p>
+        <p>Click the button below to accept the invitation:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${invitationLink}"
+             style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            Accept Invitation
+          </a>
+        </div>
+        <p style="color: #6b7280; font-size: 14px;">Or copy and paste this link in your browser:</p>
+        <p style="color: #2563eb; word-break: break-all; font-size: 14px;">${invitationLink}</p>
+        <p style="color: #6b7280; font-size: 12px; margin-top: 30px;">
+          This invitation will expire in 7 days. If you didn't expect this invitation, you can safely ignore this email.
+        </p>
+      </div>
+    `;
+
+    await sendEmail(
+      email,
+      `Invitation to join ${workspace.name} on TaskWell`,
+      emailContent
+    );
 
     res.status(201).json({
       message: "Invitation sent successfully",

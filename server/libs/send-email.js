@@ -10,7 +10,7 @@ const fromEmail = process.env.FROM_EMAIL;
 export const sendEmail = async (to, subject, html) => {
   const msg = {
     to,
-    from: `TaskWell <${fromEmail}`,
+    from: `TaskWell <${fromEmail}>`,
     subject,
     html,
   };
