@@ -339,7 +339,7 @@ const inviteUserToWorkspace = async (req, res) => {
     });
 
     // Send email with invitation link
-    const invitationLink = `${process.env.FRONTEND_URL}/workspace-invite?token=${token}`;
+    const invitationLink = `${process.env.FRONTEND_URL}/workspace-invite/${workspaceId}?tk=${token}`;
     const emailContent = workspaceInvitationTemplate(
       workspace.name,
       invitationLink,
