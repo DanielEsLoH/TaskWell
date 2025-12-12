@@ -28,5 +28,9 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
+  },
+  "overrides": {
+    "glob": "^10.4.5",
+    "rimraf": "^5.0.7"
   }
 }
