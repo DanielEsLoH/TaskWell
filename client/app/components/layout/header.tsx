@@ -1,6 +1,7 @@
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -9,8 +10,8 @@ import {
 import { useAuth } from "@/provider/auth-context";
 import { useNotifications } from "@/provider/notification-context";
 import type { Workspace } from "@/types";
-import { Bell, Plus, User } from "lucide-react";
-import { Link } from "react-router";
+import { Bell, Plus, PlusCircle, User } from "lucide-react";
+import { Link, useLoaderData, useLocation, useNavigate } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
@@ -21,6 +22,7 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
 import { getInitials } from "@/lib/utils";
+import { WorkspaceAvatar } from "../workspace/workspace-avatar";
 
 interface HeaderProps {
   onWorkspaceSelected: (workspace: Workspace) => void;
@@ -33,14 +35,73 @@ export const Header = ({
   selectedWorkspace,
   onCreateWorkspace,
 }: HeaderProps) => {
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead } =
     useNotifications();
+  const { workspaces } = useLoaderData() as { workspaces: Workspace[] };
+  const isOnWorkspacePage = useLocation().pathname.includes("/workspace");
+
+  const handleOnClick = (workspace: Workspace) => {
+    onWorkspaceSelected(workspace);
+    const location = window.location;
+
+    if (isOnWorkspacePage) {
+      navigate(`/workspaces/${workspace._id}`);
+    } else {
+      const basePath = location.pathname;
+      navigate(`${basePath}?workspaceId=${workspace._id}`);
+    }
+  };
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-background px-6">
       <div className="flex flex-1 items-center gap-4">
-        {/* Workspace Selector can go here if needed, or keeping existing structure */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant={"outline"}>
+              {selectedWorkspace ? (
+                <>
+                  {selectedWorkspace.color && (
+                    <WorkspaceAvatar
+                      color={selectedWorkspace.color}
+                      name={selectedWorkspace.name}
+                    />
+                  )}
+                  <span className="font-medium">{selectedWorkspace?.name}</span>
+                </>
+              ) : (
+                <span className="font-medium">Select Workspace</span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Workspace</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+
+            <DropdownMenuGroup>
+              {workspaces.map((ws) => (
+                <DropdownMenuItem
+                  key={ws._id}
+                  onClick={() => handleOnClick(ws)}
+                >
+                  {ws.color && (
+                    <WorkspaceAvatar color={ws.color} name={ws.name} />
+                  )}
+                  <span className="ml-2">{ws.name}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={onCreateWorkspace}>
+                <PlusCircle className="w-4 h-4 mr-2" />
+                Create Workspace
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="flex items-center gap-4">
