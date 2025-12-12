@@ -1,5 +1,5 @@
 import type { WorkspaceForm } from "@/components/workspace/create-workspace";
-import { fetchData, postData } from "@/lib/fetch-util";
+import { fetchData, postData, updateData, deleteData } from "@/lib/fetch-util";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const useCreateWorkspace = () => {
@@ -36,6 +36,27 @@ export const useGetWorkspaceDetailsQuery = (workspaceId: string | null) => {
     queryKey: ["workspace", workspaceId, "details"],
     queryFn: async () => fetchData(`/workspaces/${workspaceId}`),
     enabled: !!workspaceId,
+  });
+};
+
+export const useGetWorkspaceArchivedItemsQuery = (workspaceId: string | null) => {
+  return useQuery({
+    queryKey: ["workspace", workspaceId, "archived"],
+    queryFn: async () => fetchData(`/workspaces/${workspaceId}/archived`),
+    enabled: !!workspaceId,
+  });
+};
+
+export const useUpdateWorkspaceMutation = (workspaceId: string) => {
+  return useMutation({
+    mutationFn: async (data: { name: string; description: string }) =>
+      updateData(`/workspaces/${workspaceId}`, data),
+  });
+};
+
+export const useDeleteWorkspaceMutation = (workspaceId: string) => {
+  return useMutation({
+    mutationFn: async () => deleteData(`/workspaces/${workspaceId}`),
   });
 };
 

@@ -4,6 +4,8 @@ import dotenv from "dotenv"; // Loads environment variables from a .env file
 import express from "express"; // The core Express.js framework
 import mongoose from "mongoose"; // An ODM (Object Data Modeling) library for MongoDB
 import morgan from "morgan"; // HTTP request logger middleware
+import http from "http";
+import { initSocket } from "./libs/socket.js";
 
 // Import route handlers
 import routes from "./routes/index.js";
@@ -13,6 +15,9 @@ dotenv.config();
 
 // Create an instance of the Express application
 const app = express();
+const server = http.createServer(app);
+
+initSocket(server);
 
 // --- Application Middleware ---
 // Configure and use CORS to allow requests from the specified frontend URL
@@ -64,6 +69,6 @@ app.use((req, res) => {
 });
 
 // Start the server and listen on the specified port
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`); // Logs a message to the console confirming the server is running
 });

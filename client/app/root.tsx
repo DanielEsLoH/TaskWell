@@ -9,8 +9,13 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import ReactQueryProvider from "./provider/react-query-provider";
+import { AuthProvider } from "./provider/auth-context";
+import { ReactQueryProvider } from "./provider/react-query-provider";
+import { Toaster } from "./components/ui/sonner";
+import { NotificationProvider } from "./provider/notification-context";
+import { ThemeProvider } from "./provider/theme-provider";
 
+// Force HMR rebuild
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -37,6 +42,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
         <ScrollRestoration />
         <Scripts />
+        <Toaster />
       </body>
     </html>
   );
@@ -44,9 +50,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <ReactQueryProvider>
-      <Outlet />
-    </ReactQueryProvider>
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <ReactQueryProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <Outlet />
+          </NotificationProvider>
+        </AuthProvider>
+      </ReactQueryProvider>
+    </ThemeProvider>
   );
 }
 

@@ -6,19 +6,14 @@ import { taskSchema } from "../libs/validate-schema.js";
 import {
   achievedTask,
   addComment,
-  addSubTask,
+  createSubTask,
   createTask,
-  getActivityByResourceId,
-  getCommentsByTaskId,
   getMyTasks,
-  getTaskById,
-  updateSubTask,
+  getTask,
   updateTaskAssignees,
-  updateTaskDescription,
   updateTaskPriority,
   updateTaskStatus,
-  updateTaskTitle,
-  watchTask,
+  updateTask,
 } from "../controllers/task.js";
 import authMiddleware from "../middleware/auth-middleware.js";
 
@@ -43,7 +38,7 @@ router.post(
     params: z.object({ taskId: z.string() }),
     body: z.object({ title: z.string() }),
   }),
-  addSubTask
+  createSubTask
 );
 
 router.post(
@@ -57,51 +52,12 @@ router.post(
 );
 
 router.post(
-  "/:taskId/watch",
-  authMiddleware,
-  validateRequest({
-    params: z.object({ taskId: z.string() }),
-  }),
-  watchTask
-);
-
-router.post(
   "/:taskId/achieved",
   authMiddleware,
   validateRequest({
     params: z.object({ taskId: z.string() }),
   }),
   achievedTask
-);
-
-router.put(
-  "/:taskId/update-subtask/:subTaskId",
-  authMiddleware,
-  validateRequest({
-    params: z.object({ taskId: z.string(), subTaskId: z.string() }),
-    body: z.object({ completed: z.boolean() }),
-  }),
-  updateSubTask
-);
-
-router.put(
-  "/:taskId/title",
-  authMiddleware,
-  validateRequest({
-    params: z.object({ taskId: z.string() }),
-    body: z.object({ title: z.string() }),
-  }),
-  updateTaskTitle
-);
-
-router.put(
-  "/:taskId/description",
-  authMiddleware,
-  validateRequest({
-    params: z.object({ taskId: z.string() }),
-    body: z.object({ description: z.string() }),
-  }),
-  updateTaskDescription
 );
 
 router.put(
@@ -144,24 +100,16 @@ router.get(
       taskId: z.string(),
     }),
   }),
-  getTaskById
+  getTask
 );
 
-router.get(
-  "/:resourceId/activity",
-  authMiddleware,
-  validateRequest({
-    params: z.object({ resourceId: z.string() }),
-  }),
-  getActivityByResourceId
-);
-
-router.get(
-  "/:taskId/comments",
+router.put(
+  "/:taskId",
   authMiddleware,
   validateRequest({
     params: z.object({ taskId: z.string() }),
   }),
-  getCommentsByTaskId
+  updateTask
 );
+
 export default router;

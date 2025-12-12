@@ -6,6 +6,7 @@ import User from "../models/user.js";
 import crypto from "crypto";
 import { sendEmail } from "../libs/send-email.js";
 import { workspaceInvitationTemplate } from "../libs/email-templates.js";
+import { sendNotification } from "../libs/socket.js";
 
 const createWorkspace = async (req, res) => {
   try {
@@ -355,6 +356,19 @@ const inviteUserToWorkspace = async (req, res) => {
       emailContent
     );
 
+    // Notify user if they already exist
+    const invitedUser = await User.findOne({ email });
+    if (invitedUser) {
+      await sendNotification({
+        recipients: [invitedUser._id],
+        sender: req.user._id,
+        type: "WORKSPACE_INVITE",
+        message: `You have been invited to join workspace: ${workspace.name}`,
+        relatedId: workspace._id,
+        relatedType: "Workspace",
+      });
+    }
+
     res.status(201).json({
       message: "Invitation sent successfully",
       invitation: {
@@ -485,6 +499,124 @@ const acceptGenerateInvite = async (req, res) => {
   }
 };
 
+const getWorkspaceArchivedItems = async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+
+    const workspace = await Workspace.findOne({
+      _id: workspaceId,
+      "members.user": req.user._id,
+    });
+
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    // Get all projects to filter tasks
+    const allProjects = await Project.find({ workspace: workspaceId }).select(
+      "_id"
+    );
+    const allProjectIds = allProjects.map((p) => p._id);
+
+    // Get archived projects
+    const archivedProjects = await Project.find({
+      workspace: workspaceId,
+      isArchived: true,
+    })
+      .populate("tasks")
+      .populate("members.user", "name email profilePicture")
+      .sort({ updatedAt: -1 });
+
+    // Get archived tasks
+    const archivedTasks = await Task.find({
+      project: { $in: allProjectIds },
+      isArchived: true,
+    })
+      .populate("project", "title")
+      .populate("assignees", "name email profilePicture")
+      .sort({ updatedAt: -1 });
+
+    res.status(200).json({
+      projects: archivedProjects,
+      tasks: archivedTasks,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const updateWorkspace = async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+    const { name, description } = req.body;
+
+    const workspace = await Workspace.findOne({
+      _id: workspaceId,
+      "members.user": req.user._id,
+    });
+
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    const member = workspace.members.find(
+      (m) => m.user.toString() === req.user._id.toString()
+    );
+
+    if (!["owner", "admin"].includes(member.role)) {
+      return res
+        .status(403)
+        .json({ message: "You don't have permission to update this workspace" });
+    }
+
+    workspace.name = name || workspace.name;
+    workspace.description = description || workspace.description;
+
+    await workspace.save();
+
+    res.status(200).json(workspace);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const deleteWorkspace = async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+
+    const workspace = await Workspace.findOne({
+      _id: workspaceId,
+      owner: req.user._id,
+    });
+
+    if (!workspace) {
+      return res
+        .status(404)
+        .json({ message: "Workspace not found or you are not the owner" });
+    }
+
+    // Delete all projects in the workspace
+    const projects = await Project.find({ workspace: workspaceId });
+    const projectIds = projects.map((p) => p._id);
+
+    // Delete all tasks in those projects
+    await Task.deleteMany({ project: { $in: projectIds } });
+
+    // Delete all projects
+    await Project.deleteMany({ workspace: workspaceId });
+
+    // Delete the workspace
+    await Workspace.findByIdAndDelete(workspaceId);
+
+    res.status(200).json({ message: "Workspace deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export {
   createWorkspace,
   getWorkspaces,
@@ -494,4 +626,7 @@ export {
   inviteUserToWorkspace,
   acceptInviteByToken,
   acceptGenerateInvite,
+  getWorkspaceArchivedItems,
+  updateWorkspace,
+  deleteWorkspace,
 };
