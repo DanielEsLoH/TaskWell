@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         setIsAuthenticated(false);
         if (!isPublicRoute) {
-          navigate("/sign-in");
+          navigate("/");
         }
       }
       setIsloading(false);
@@ -46,7 +46,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const handleLogout = () => {
       logout();
-      navigate("/sign-in");
     };
     window.addEventListener("force-logout", handleLogout);
     return () => window.removeEventListener("force-logout", handleLogout);
@@ -65,6 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     setIsAuthenticated(false);
     queryClient.clear();
+    navigate("/");
   };
 
   const values = {
